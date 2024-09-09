@@ -2,8 +2,6 @@
 
 namespace Model;
 
-// require_once __DIR__ . '/BaseEntity.php';
-
 class Comment extends BaseEntity
 {
       private string $body;

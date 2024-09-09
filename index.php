@@ -3,9 +3,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Utils\NewsManager;
 use Utils\CommentManager;
-// define('ROOT', __DIR__);
-// require_once(ROOT . '/utils/NewsManager.php');
-// require_once(ROOT . '/utils/CommentManager.php');
 
 foreach (NewsManager::getInstance()->listNews() as $news) {
 	echo ("############ NEWS " . $news->getTitle() . " ############\n");
