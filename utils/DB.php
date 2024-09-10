@@ -17,11 +17,10 @@ class DB
 		$this->pdo = new \PDO($dsn, $user, $password);
 	}
 
-	public static function getInstance()
+	public static function getInstance(): self
 	{
-		if (null === self::$instance) {
-			$c = __CLASS__;
-			self::$instance = new $c;
+		if (self::$instance === null) {
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -32,9 +31,11 @@ class DB
 		return $sth->fetchAll();
 	}
 
-	public function exec($sql)
+	public function exec($sql, $params)
 	{
-		return $this->pdo->exec($sql);
+		$stmt = $this->pdo->prepare($sql);
+
+		return $stmt->execute($params);
 	}
 
 	public function lastInsertId()
