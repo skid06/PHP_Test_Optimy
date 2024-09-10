@@ -7,21 +7,26 @@ use Model\Comment;
 
 class CommentManager
 {
-	private static $instance = null;
+	private static ?self $instance = null;
+	private DB $db;
 
-	public static function getInstance()
+	// Constructor is private to prevent direct instantiation.
+	private function __construct()
 	{
-		if (null === self::$instance) {
-			$c = __CLASS__;
-			self::$instance = new $c;
+		$this->db = DB::getInstance();
+	}
+
+	public static function getInstance(): self
+	{
+		if (self::$instance === null) {
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
 
 	public function listComments()
 	{
-		$db = DB::getInstance();
-		$rows = $db->select('SELECT * FROM `comment`');
+		$rows = $this->db->select('SELECT * FROM `comment`');
 
 		$comments = [];
 		foreach ($rows as $row) {
@@ -37,16 +42,22 @@ class CommentManager
 
 	public function addCommentForNews($body, $newsId)
 	{
-		$db = DB::getInstance();
-		$sql = "INSERT INTO `comment` (`body`, `created_at`, `news_id`) VALUES('" . $body . "','" . date('Y-m-d') . "','" . $newsId . "')";
-		$db->exec($sql);
-		return $db->lastInsertId($sql);
+		$sql = "INSERT INTO `comment` (`body`, `created_at`, `news_id`) VALUES (:body, :created_at, :news_id)";
+		$params = [
+			':body' => $body,
+			':created_at' => date('Y-m-d'),
+			':news_id' => $newsId,
+		];
+		$this->db->exec($sql, $params);
+
+		return $this->db->lastInsertId();
 	}
 
 	public function deleteComment($id)
 	{
-		$db = DB::getInstance();
-		$sql = "DELETE FROM `comment` WHERE `id`=" . $id;
-		return $db->exec($sql);
+		$sql = "DELETE FROM `comment` WHERE `id` = :id";
+		$params = [':id' => $id];
+
+		return $this->db->exec($sql, $params);
 	}
 }
