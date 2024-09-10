@@ -8,13 +8,19 @@ use Model\News;
 
 class NewsManager
 {
-	private static $instance = null;
+	private static ?self $instance = null;
+	private DB $db;
 
-	public static function getInstance()
+	// Constructor is private to prevent direct instantiation.
+	private function __construct()
 	{
-		if (null === self::$instance) {
-			$c = __CLASS__;
-			self::$instance = new $c;
+		$this->db = DB::getInstance();
+	}
+
+	public static function getInstance(): self
+	{
+		if (self::$instance === null) {
+			self::$instance = new self();
 		}
 		return self::$instance;
 	}
@@ -24,8 +30,7 @@ class NewsManager
 	 */
 	public function listNews()
 	{
-		$db = DB::getInstance();
-		$rows = $db->select('SELECT * FROM `news`');
+		$rows = $this->db->select('SELECT * FROM `news`');
 
 		$news = [];
 		foreach ($rows as $row) {
@@ -44,10 +49,17 @@ class NewsManager
 	 */
 	public function addNews($title, $body)
 	{
-		$db = DB::getInstance();
-		$sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES('" . $title . "','" . $body . "','" . date('Y-m-d') . "')";
-		$db->exec($sql);
-		return $db->lastInsertId($sql);
+		// $sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES('" . $title . "','" . $body . "','" . date('Y-m-d') . "')";
+		$sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES (:title, :body, :created_at)";
+		$params = [
+			':title' => $title,
+			':body' => $body,
+			':created_at' => date('Y-m-d')
+		];
+
+		$this->db->exec($sql, $params);
+
+		return $this->db->lastInsertId();
 	}
 
 	/**
@@ -64,12 +76,16 @@ class NewsManager
 			}
 		}
 
-		foreach ($idsToDelete as $id) {
-			CommentManager::getInstance()->deleteComment($id);
+		foreach ($idsToDelete as $commentId) {
+			CommentManager::getInstance()->deleteComment($commentId);
 		}
 
-		$db = DB::getInstance();
-		$sql = "DELETE FROM `news` WHERE `id`=" . $id;
-		return $db->exec($sql);
+		// $sql = "DELETE FROM `news` WHERE `id`=" . $id;
+		// return $this->db->exec($sql);
+
+		$sql = "DELETE FROM `news` WHERE `id` = :id";
+		$params = [':id' => $id];
+
+		return $this->db->exec($sql, $params);
 	}
 }
