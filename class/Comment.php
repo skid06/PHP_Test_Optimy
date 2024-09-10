@@ -7,21 +7,16 @@ class Comment extends BaseEntity
       private string $body;
       private int $newsId;
 
-      public function setBody(string $body): self
+      public function __construct(int $id, string $createdAt, string $body, int $newsId)
       {
+            parent::__construct($id, $createdAt);
+            $this->newsId = $newsId;
             $this->body = $body;
-            return $this;
       }
 
       public function getBody(): string
       {
             return $this->body;
-      }
-
-      public function setNewsId(int $newsId): self
-      {
-            $this->newsId = $newsId;
-            return $this;
       }
 
       public function getNewsId(): int

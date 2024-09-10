@@ -7,21 +7,16 @@ class News extends BaseEntity
       private string $title;
       private string $body;
 
-      public function setTitle(string $title): self
+      public function __construct(int $id, string $createdAt, string $title, string $body)
       {
+            parent::__construct($id, $createdAt);
             $this->title = $title;
-            return $this;
+            $this->body = $body;
       }
 
       public function getTitle(): string
       {
             return $this->title;
-      }
-
-      public function setBody(string $body): self
-      {
-            $this->body = $body;
-            return $this;
       }
 
       public function getBody(): string

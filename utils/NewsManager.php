@@ -32,16 +32,19 @@ class NewsManager
 	{
 		$rows = $this->db->select('SELECT * FROM `news`');
 
-		$news = [];
+		$newsList = [];
 		foreach ($rows as $row) {
-			$n = new News();
-			$news[] = $n->setId($row['id'])
-				->setTitle($row['title'])
-				->setBody($row['body'])
-				->setCreatedAt($row['created_at']);
+			$news = new News(
+				(int)$row['id'],
+				$row['created_at'],
+				$row['title'],
+				$row['body']
+			);
+
+			$newsList[] = $news;
 		}
 
-		return $news;
+		return $newsList;
 	}
 
 	/**
@@ -49,7 +52,6 @@ class NewsManager
 	 */
 	public function addNews($title, $body)
 	{
-		// $sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES('" . $title . "','" . $body . "','" . date('Y-m-d') . "')";
 		$sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES (:title, :body, :created_at)";
 		$params = [
 			':title' => $title,
@@ -79,9 +81,6 @@ class NewsManager
 		foreach ($idsToDelete as $commentId) {
 			CommentManager::getInstance()->deleteComment($commentId);
 		}
-
-		// $sql = "DELETE FROM `news` WHERE `id`=" . $id;
-		// return $this->db->exec($sql);
 
 		$sql = "DELETE FROM `news` WHERE `id` = :id";
 		$params = [':id' => $id];

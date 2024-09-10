@@ -28,16 +28,19 @@ class CommentManager
 	{
 		$rows = $this->db->select('SELECT * FROM `comment`');
 
-		$comments = [];
+		$commentList = [];
 		foreach ($rows as $row) {
-			$n = new Comment();
-			$comments[] = $n->setId($row['id'])
-				->setBody($row['body'])
-				->setCreatedAt($row['created_at'])
-				->setNewsId($row['news_id']);
+			$comment = new Comment(
+				$row['id'],
+				$row['created_at'],
+				$row['body'],
+				$row['news_id']
+			);
+
+			$commentList[] = $comment;
 		}
 
-		return $comments;
+		return $commentList;
 	}
 
 	public function addCommentForNews($body, $newsId)

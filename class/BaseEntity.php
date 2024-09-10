@@ -7,21 +7,15 @@ class BaseEntity
       protected int $id;
       protected $createdAt;
 
-      public function setId(int $id): self
+      public function __construct(int $id, string $createdAt)
       {
             $this->id = $id;
-            return $this;
+            $this->createdAt = $createdAt;
       }
 
       public function getId(): int
       {
             return $this->id;
-      }
-
-      public function setCreatedAt($createdAt): self
-      {
-            $this->createdAt = $createdAt;
-            return $this;
       }
 
       public function getCreatedAt()
