@@ -2,35 +2,23 @@
 
 namespace Utils;
 
-use Utils\DB;
 use Model\Comment;
 
-class CommentManager
+class CommentManager extends BaseManager
 {
-	private static ?self $instance = null;
-	private DB $db;
-
-	// Constructor is private to prevent direct instantiation.
-	private function __construct()
+	public function __construct(DB $db)
 	{
-		$this->db = DB::getInstance();
+		parent::__construct($db);
 	}
 
 	/**
-	 * Uses new self() instead of new $c for instantiating the class
-	 * It avoids potential issues with class name changes or subclassing.
+	 * Retrieves a list of all comments.
+	 * 
+	 * @return Comment[] Array of Comment objects.
 	 */
-	public static function getInstance(): self
+	public function list(): array
 	{
-		if (self::$instance === null) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
-	public function listComments()
-	{
-		$rows = $this->db->select('SELECT * FROM `comment`');
+		$rows = $this->query('SELECT * FROM `comment`');
 
 		$commentList = [];
 		foreach ($rows as $row) {
@@ -47,24 +35,40 @@ class CommentManager
 		return $commentList;
 	}
 
-	public function addCommentForNews($body, $newsId)
+	/**
+	 * Adds a new comment for a specific news item.
+	 * 
+	 * @param string $body The content of the comment.
+	 * @param int $newsId The ID of the news item.
+	 * 
+	 * @return int The ID of the newly inserted comment.
+	 */
+	public function addCommentForNews(string $body, int $newsId): int
 	{
 		$sql = "INSERT INTO `comment` (`body`, `created_at`, `news_id`) VALUES (:body, :created_at, :news_id)";
 		$params = [
 			':body' => $body,
-			':created_at' => date('Y-m-d'),
+			':created_at' => date('Y-m-d H:i:s'),
 			':news_id' => $newsId,
 		];
-		$this->db->exec($sql, $params);
+
+		$this->execute($sql, $params);
 
 		return $this->db->lastInsertId();
 	}
 
-	public function deleteComment($id)
+	/**
+	 * Deletes a comment by its ID.
+	 * 
+	 * @param int $id The ID of the comment to delete.
+	 * 
+	 * @return bool Whether the deletion was successful.
+	 */
+	public function delete(int $id): bool
 	{
 		$sql = "DELETE FROM `comment` WHERE `id` = :id";
 		$params = [':id' => $id];
 
-		return $this->db->exec($sql, $params);
+		return $this->execute($sql, $params);
 	}
 }

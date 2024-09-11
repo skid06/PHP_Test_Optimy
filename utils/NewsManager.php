@@ -2,39 +2,25 @@
 
 namespace Utils;
 
-use Utils\CommentManager;
-use Utils\DB;
 use Model\News;
+use Utils\CommentManager;
 
-class NewsManager
+class NewsManager extends BaseManager
 {
-	private static ?self $instance = null;
-	private DB $db;
-
-	// Constructor is private to prevent direct instantiation.
-	private function __construct()
+	public function __construct(DB $db)
 	{
-		$this->db = DB::getInstance();
+		parent::__construct($db);
 	}
 
 	/**
-	 * Uses new self() instead of new $c for instantiating the class
-	 * It avoids potential issues with class name changes or subclassing.
+	 * Retrieves a list of all news items.
+	 * 
+	 * @return News[] Array of News objects.
 	 */
-	public static function getInstance(): self
+	public function list(): array
 	{
-		if (self::$instance === null) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
+		$rows = $this->query('SELECT * FROM `news`');
 
-	/**
-	 * list all news
-	 */
-	public function listNews()
-	{
-		$rows = $this->db->select('SELECT * FROM `news`');
 
 		$newsList = [];
 		foreach ($rows as $row) {
@@ -52,43 +38,49 @@ class NewsManager
 	}
 
 	/**
-	 * add a record in news table
+	 * Adds a new news item.
+	 * 
+	 * @param string $title The title of the news item.
+	 * @param string $body The content of the news item.
+	 * 
+	 * @return int The ID of the newly inserted news item.
 	 */
-	public function addNews($title, $body)
+	public function addNews(string $title, string $body): int
 	{
 		$sql = "INSERT INTO `news` (`title`, `body`, `created_at`) VALUES (:title, :body, :created_at)";
 		$params = [
 			':title' => $title,
 			':body' => $body,
-			':created_at' => date('Y-m-d')
+			':created_at' => date('Y-m-d H:i:s')
 		];
 
-		$this->db->exec($sql, $params);
+		$this->execute($sql, $params);
 
 		return $this->db->lastInsertId();
 	}
 
 	/**
-	 * deletes a news, and also linked comments
+	 * Deletes a news item and its associated comments.
+	 * 
+	 * @param int $id The ID of the news item to delete.
+	 * 
+	 * @return bool Whether the deletion was successful.
 	 */
-	public function deleteNews($id)
+	public function delete(int $id): bool
 	{
-		$comments = CommentManager::getInstance()->listComments();
-		$idsToDelete = [];
+		// Delete related comments first
+		$commentManager = new CommentManager($this->db);
+		$comments = $commentManager->list();
 
-		foreach ($comments as $comment) {
-			if ($comment->getNewsId() == $id) {
-				$idsToDelete[] = $comment->getId();
-			}
+		$idsToDelete = array_filter($comments, fn($comment) => $comment->getNewsId() === $id);
+		foreach ($idsToDelete as $comment) {
+			$commentManager->delete($comment->getId());
 		}
 
-		foreach ($idsToDelete as $commentId) {
-			CommentManager::getInstance()->deleteComment($commentId);
-		}
-
+		// Delete news item
 		$sql = "DELETE FROM `news` WHERE `id` = :id";
 		$params = [':id' => $id];
 
-		return $this->db->exec($sql, $params);
+		return $this->execute($sql, $params);
 	}
 }
