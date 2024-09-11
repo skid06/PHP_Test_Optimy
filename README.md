@@ -21,7 +21,7 @@ This simple application works, but with very old-style monolithic codebase, so d
 - Uses autoloader to handle file inclusion rather than manually including files within the constructor. This approach is more scalable and aligns with modern PHP practices.
 - Removes file inclusion in the constructor as it should focus on initialization of objects' state.
 
-# Important: Run the command 'composer dump-autoload' to generate the autoloader.
+## Important: Run the command 'composer dump-autoload' to generate the autoloader.
 
 ## 2. Creates an Abstract class BaseManger as base class for CommentManager and NewsManager.
 
