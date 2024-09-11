@@ -14,7 +14,13 @@ class DB
 		$user = 'root';
 		$password = '';
 
-		$this->pdo = new \PDO($dsn, $user, $password);
+		try {
+			$this->pdo = new \PDO($dsn, $user, $password);
+			$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+		} catch (\PDOException $e) {
+			// Handle connection error
+			throw new \RuntimeException('Database connection failed: ' . $e->getMessage());
+		}
 	}
 
 	/**
