@@ -23,7 +23,14 @@ This simple application works, but with very old-style monolithic codebase, so d
 
 # Important: Run the command 'composer dump-autoload' to generate the autoloader.
 
-## 2. Using constructors and a base class for Comment.php and News.php
+## 2. Creates an Abstract class BaseManger as base class for CommentManager and NewsManager.
+
+- BaseManager defines abstract methods to be implemented by the child classes. It also handles methods for DB operations.
+- CommentManager and NewsManager extend AbstractManager to reuse common functionality and implement the abstract methods.
+- Removes the previous usage of getInstance method as we will directly instantiate the CommentManager and NewsManager, by having a base class, singleton instance will no longer be needed.
+- The previous use of the Singleton pattern (via the getInstance method) has been removed. Instead, CommentManager and NewsManager can now be instantiated directly. This change simplifies the code and aligns with the new design where each manager class operates independently.
+
+## 3. Using constructors and a base class for Comment.php and News.php
 
 - Adds \_\_construct methods for initializing properties to all the classes. This reduces the need for setters if initial values are provided.
 - Creates a BaseEntity class that serves as a common base class that contains shared functionality and properties. Both News and Comment classes will then extend this base class, promoting code reuse and simplifying maintenance.
