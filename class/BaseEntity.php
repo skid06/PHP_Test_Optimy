@@ -2,7 +2,7 @@
 
 namespace Model;
 
-class BaseEntity
+abstract class BaseEntity
 {
       protected int $id;
       protected $createdAt;
