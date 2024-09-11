@@ -17,6 +17,10 @@ class DB
 		$this->pdo = new \PDO($dsn, $user, $password);
 	}
 
+	/**
+	 * Uses new self() instead of new $c for instantiating the class
+	 * It avoids potential issues with class name changes or subclassing.
+	 */
 	public static function getInstance(): self
 	{
 		if (self::$instance === null) {
